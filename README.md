@@ -49,10 +49,16 @@ APIキーの秘匿化（Secrets設定）に加え、設定ミスの原因にな�
 ```bash
 git clone [https://github.com/eik016/gemini-note-summarizer.git](https://github.com/eik016/gemini-note-summarizer.git)
 cd gemini-note-summarizer
-1. 依存ライブラリのインストール
+```
+2. 依存ライブラリのインストール
 ```bash
 pip install -r requirements.txt
-1．環境変数の設定
+```
+3．環境変数の設定
+```bash
 GEMINI_API_KEY = "YOUR_API_KEY"
-1．アプリの起動
+```
+4．アプリの起動
+```bash
 streamlit run app.py
+```
