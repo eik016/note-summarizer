@@ -1,4 +1,3 @@
-# note-summarizer
 # 講義ノート要約 & キーワード抽出ツール (gemini-note-summarizer)
 
 大学の講義ノートや長文資料を貼り付けるだけで、3行要約、重要キーワード5選、講義の補足ポイントを自動生成する学習支援Webアプリケーション。
@@ -46,9 +45,12 @@ APIキーの秘匿化（Secrets設定）に加え、設定ミスの原因にな�
 
 ---
 
-## ローカルでの実行方法
-
 1. リポジトリのクローン
 ```bash
 git clone [https://github.com/eik016/gemini-note-summarizer.git](https://github.com/eik016/gemini-note-summarizer.git)
 cd gemini-note-summarizer
+2. 依存ライブラリのインストール
+```bash
+pip install -r requirements.txt
+GEMINI_API_KEY = "YOUR_API_KEY"
+streamlit run app.py
