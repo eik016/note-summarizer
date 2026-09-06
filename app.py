@@ -61,7 +61,7 @@ if st.button("ノートを解析する", type="primary"):
                 try:
                     response = client.models.generate_content(
                         model="gemini-3.6-flash",
-                        contents=prompt,
+                        contents=[prompt],
                     )
                     st.success("解析が完了しました！")
                     st.markdown("---")
