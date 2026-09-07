@@ -55,6 +55,7 @@ cd note-summarizer
 pip install -r requirements.txt
 ```
 3. 環境変数の設定
+
 `.streamlit/secrets.toml` ファイルを作成し、ご自身のGemini APIキーを設定します。
 
 ```toml
