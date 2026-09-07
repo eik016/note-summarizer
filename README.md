@@ -48,7 +48,6 @@ APIキーの秘匿化（Secrets設定）に加え、設定ミスの原因にな�
 1. リポジトリのクローン
 ```bash
 git clone https://github.com/eik016/note-summarizer.git
-https://github.com/eik016/note-summarizer.git
 cd note-summarizer
 ```
 2. 依存ライブラリのインストール
