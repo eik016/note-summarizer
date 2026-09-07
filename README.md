@@ -3,6 +3,7 @@
 大学の講義ノートや長文資料を貼り付けるだけで、3行要約、重要キーワード5選、講義の補足ポイントを自動生成する学習支援Webアプリケーション。
 
 Pythonによる事前チェック（ルールベース）とGemini APIによる生成処理（LLM）を組み合わせたハイブリッド構成で開発。
+👉 **[Webアプリを試す（Streamlit Community Cloud）](https://note-summarizer-8nzxeutjnx5mzoppl6mle.streamlit.app)**
 
 ---
 
@@ -24,7 +25,7 @@ Pythonによる事前チェック（ルールベース）とGemini APIによる�
 
 ## 使用技術
 
-- Language: Python 3.11+
+- Language: Python 3.12 
 - Framework: Streamlit
 - SDK: google-genai (Gemini API / gemini-3.6-flash)
 - Deployment: Streamlit Community Cloud
@@ -60,5 +61,5 @@ GEMINI_API_KEY = "YOUR_API_KEY"
 ```
 4．アプリの起動
 ```bash
-streamlit run app.py
+python -m streamlit run app.py
 ```
