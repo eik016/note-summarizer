@@ -17,7 +17,7 @@ else:
     st.error("APIキーが設定されていません。.streamlit/secrets.toml を確認してください。")
     st.stop()
 
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-3.6-flash")
 
 # --- セッション状態（記憶領域）の初期化 ---
 if "summary" not in st.session_state:
