@@ -42,8 +42,8 @@ with tab1:
         
         # テキストファイルの場合
         if file_type == "text/plain":
-            input_content = uploaded_file.read().decode("utf-8")
-          　st.success("テキストファイルを読み込みました。")
+        input_content = uploaded_file.read().decode("utf-8")
+        st.success("テキストファイルを読み込みました。")
         
         # 画像ファイルの場合
         elif file_type in ["image/png", "image/jpeg"]:
