@@ -18,7 +18,7 @@ else:
     st.error("APIキーが設定されていません。.streamlit/secrets.toml を確認してください。")
     st.stop()
 
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-3.6-flash")
 
 # --- UI構築 ---
 st.title("📝 講義ノート要約ツール")
