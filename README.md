@@ -3,8 +3,9 @@
 大学の講義ノートや長文資料を貼り付けるだけで、3行要約、重要キーワード5選、講義の補足ポイントを自動生成する学習支援Webアプリケーション。
 
 Pythonによる事前チェック（ルールベース）とGemini APIによる生成処理（LLM）を組み合わせたハイブリッド構成で開発。
-https://note-summarizer-8nzxeutjnx5mzoppl6mle.streamlit.app
 
+以下のリンクから、ブラウザ上で実際にアプリをお試しいただけます。
+👉 **[講義ノート要約ツールを試す](https://note-summarizer-8nzxeutjnx5mzoppl6mle.streamlit.app)**
 ---
 
 ## 主な機能と特徴
