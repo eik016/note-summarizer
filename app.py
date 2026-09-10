@@ -11,14 +11,13 @@ st.set_page_config(
 )
 
 # --- Gemini API 設定 ---
-# .streamlit/secrets.toml から API キーを取得
 if "GEMINI_API_KEY" in st.secrets:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 else:
     st.error("APIキーが設定されていません。.streamlit/secrets.toml を確認してください。")
     st.stop()
 
-model = genai.GenerativeModel("gemini-3.6-flash")
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 # --- UI構築 ---
 st.title("📝 講義ノート要約ツール")
@@ -42,16 +41,16 @@ with tab1:
         
         # テキストファイルの場合
         if file_type == "text/plain":
-        　　input_content = uploaded_file.read().decode("utf-8")
-        　　st.success("テキストファイルを読み込みました。")
-        
+            input_content = uploaded_file.read().decode("utf-8")
+            st.success("テキストファイルを読み込みました。")
+            
         # 画像ファイルの場合
         elif file_type in ["image/png", "image/jpeg"]:
             image = Image.open(uploaded_file)
             image_preview = image
             st.image(image, caption="アップロードされた画像", use_container_width=True)
             input_content = image
-            st.success("画像ファイルを読み込みました。")
+            
         # PDFファイルの場合
         elif file_type == "application/pdf":
             pdf_bytes = uploaded_file.read()
@@ -73,18 +72,17 @@ if st.button("✨ 要約を生成する", type="primary"):
     if input_content is None:
         st.warning("要約するテキストを入力するか、ファイルをアップロードしてください。")
     else:
-        with st.spinner("要約を生成中..."):
+        with st.spinner("Gemini APIが要約を生成中..."):
             try:
                 prompt = """
                 以下の講義資料（またはテキスト）を読み込み、学生の復習用に分かりやすく要約してください。
 
                 【出力フォーマット】
-                1. 📌 **ノートの概要**（2〜3行で簡潔に）
+                1. 📌 **講義の概要**（2〜3行で簡潔に）
                 2. 🔑 **重要キーワード・専門用語**（3〜5個、簡単な解説つき）
                 3. 💡 **要約・ポイントまとめ**（箇条書き）
                 """
                 
-                # 入力データが画像/PDFかテキストかで条件分岐して生成
                 if isinstance(input_content, str):
                     response = model.generate_content([prompt, input_content])
                 else:
