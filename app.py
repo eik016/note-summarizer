@@ -121,6 +121,9 @@ if st.button("✨ 要約を生成する", type="primary"):
                 st.session_state.input_content = current_input
                 st.session_state.chat_history = []
                 
+                # 画面を即時再描画してサイドバーの表示を最新化
+                st.rerun()
+                
             except Exception as e:
                 st.error(f"エラーが発生しました: {e}")
 
