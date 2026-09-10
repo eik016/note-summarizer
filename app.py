@@ -78,7 +78,7 @@ if st.button("✨ 要約を生成する", type="primary"):
     if current_input is None:
         st.warning("要約するテキストを入力するか、ファイルをアップロードしてください。")
     else:
-        with st.spinner("Gemini APIが要約を生成中..."):
+        with st.spinner("生成中..."):
             try:
                 prompt = """
                 以下の講義資料（またはテキスト）を読み込み、学生の復習用に分かりやすく要約してください。
@@ -125,11 +125,12 @@ if st.session_state.summary:
 
         # AIの回答生成
         with st.chat_message("assistant"):
-            with st.spinner("講義資料を参照して回答を作成中..."):
+            with st.spinner("回答を作成中..."):
                 try:
                     chat_prompt = f"""
                     あなたは大学の丁寧なTA（ティーチングアシスタント）です。
                     以下の「講義資料」と「要約結果」を参考に、学生からの質問に分かりやすく答えてください。
+                    学生が興味を持つように具体例を多く取り入れてください。
 
                     【要約結果】
                     {st.session_state.summary}
