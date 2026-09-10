@@ -5,7 +5,7 @@
 Pythonによる事前チェック（ルールベース）とGemini APIによる生成処理（LLM）を組み合わせたハイブリッド構成で開発。
 
 以下のリンクから、ブラウザ上で実際にアプリをお試しいただけます。
-👉 **[講義ノート要約ツールを試す](https://note-summarizer-8nzxeutjnx5mzoppl6mle.streamlit.app)**
+👉 https://note-summarizer-8nzxeuztjnx5mzoppl6mle.streamlit.app/
 ---
 
 ## 主な機能と特徴
