@@ -1,11 +1,12 @@
 import os
+import json
 import streamlit as st
 import google.generativeai as genai
 from PIL import Image
 
 # ページ設定
 st.set_page_config(
-    page_title="講義ノート要約＆質問ツール",
+    page_title="講義ノート要約＆クイズ・質問ツール",
     page_icon="📝",
     layout="wide"
 )
@@ -27,7 +28,11 @@ if "chat_history" not in st.session_state:
 if "input_content" not in st.session_state:
     st.session_state.input_content = None
 if "saved_history" not in st.session_state:
-    st.session_state.saved_history = []  # 過去の履歴リスト
+    st.session_state.saved_history = []
+if "quiz_data" not in st.session_state:
+    st.session_state.quiz_data = None
+if "quiz_submitted" not in st.session_state:
+    st.session_state.quiz_submitted = False
 
 # --- サイドバー：過去の履歴一覧 ---
 st.sidebar.title("📚 過去の要約・質問履歴")
@@ -47,8 +52,8 @@ else:
     st.sidebar.info("まだ履歴はありません。")
 
 # --- メイン画面 ---
-st.title("📝 講義ノート要約＆質問ツール")
-st.write("講義のテキストやファイル（PDF / 画像 / テキスト）をアップロードして要約を作成し、疑問点をAIに質問できます。")
+st.title("📝 講義ノート要約＆復習クイズアプリ")
+st.write("講義資料（PDF / 画像 / テキスト）から自動要約を作成し、復習クイズやAIへの追加質問で理解度を深められます。")
 
 # 入力方法の選択（タブ切り替え）
 tab1, tab2 = st.tabs(["📁 ファイルアップロード", "✍️ テキスト直接入力"])
@@ -88,15 +93,16 @@ with tab2:
     if text_input.strip():
         current_input = text_input
 
-# 要約実行ボタン
+# 要約・クイズ実行ボタン
 st.divider()
-if st.button("✨ 要約を生成する", type="primary"):
+if st.button("✨ 要約とクイズを生成する", type="primary"):
     if current_input is None:
         st.warning("要約するテキストを入力するか、ファイルをアップロードしてください。")
     else:
-        with st.spinner("Gemini APIが要約を生成中..."):
+        with st.spinner("Gemini APIが要約と復習クイズを生成中..."):
             try:
-                prompt = """
+                # 1. 要約の生成
+                summary_prompt = """
                 以下の講義資料（またはテキスト）を読み込み、学生の復習用に分かりやすく要約してください。
 
                 【出力フォーマット】
@@ -106,57 +112,118 @@ if st.button("✨ 要約を生成する", type="primary"):
                 """
                 
                 if isinstance(current_input, str):
-                    response = model.generate_content([prompt, current_input])
+                    summary_res = model.generate_content([summary_prompt, current_input])
                 else:
-                    response = model.generate_content([prompt, current_input])
+                    summary_res = model.generate_content([summary_prompt, current_input])
 
-                # 新しい要約を作成したら現在のチャットを保存履歴に追加
+                # 2. クイズの自動生成 (JSON形式)
+                quiz_prompt = """
+                以下の講義資料をもとに、理解度をチェックするための3択クイズを3問作成してください。
+                必ず以下のJSON配列形式のみで出力してください（Markdownの囲みや余計な文章は一切不要です）。
+
+                [
+                  {
+                    "question": "問題文1",
+                    "options": ["選択肢A", "選択肢B", "選択肢C"],
+                    "answer": "正しい選択肢のテキスト（options内の文字列と完全一致）",
+                    "explanation": "解説文"
+                  }
+                ]
+                """
+                if isinstance(current_input, str):
+                    quiz_res = model.generate_content([quiz_prompt, current_input])
+                else:
+                    quiz_res = model.generate_content([quiz_prompt, current_input])
+
+                # JSONパース
+                cleaned_json = quiz_res.text.replace("```json", "").replace("```", "").strip()
+                parsed_quiz = json.loads(cleaned_json)
+
+                # 新しい処理結果を履歴へ保存
                 if st.session_state.summary:
                     st.session_state.saved_history.append({
                         "summary": st.session_state.summary,
                         "chat": list(st.session_state.chat_history)
                     })
 
-                st.session_state.summary = response.text
+                # ステート更新
+                st.session_state.summary = summary_res.text
+                st.session_state.quiz_data = parsed_quiz
+                st.session_state.quiz_submitted = False
                 st.session_state.input_content = current_input
                 st.session_state.chat_history = []
                 
-                # 画面を即時再描画してサイドバーの表示を最新化
                 st.rerun()
                 
             except Exception as e:
-                st.error(f"エラーが発生しました: {e}")
+                st.error(f"生成中にエラーが発生しました: {e}")
 
-# --- 要約結果 & チャットQ&A表示エリア ---
+# --- 要約結果表示エリア ---
 if st.session_state.summary:
     st.subheader("📊 要約結果")
     st.markdown(st.session_state.summary)
     
-    # テキスト保存用データ作成
+    # ダウンロードボタン
     download_text = f"【要約結果】\n{st.session_state.summary}\n\n【質問・回答履歴】\n"
     for chat in st.session_state.chat_history:
         role = "学生" if chat["role"] == "user" else "AI"
         download_text += f"\n[{role}]\n{chat['content']}\n"
 
-    # ダウンロードボタン
     st.download_button(
         label="💾 要約と質問履歴をテキストで保存する",
         data=download_text,
         file_name="lecture_summary_and_qa.txt",
         mime="text/plain"
     )
-    
+
+    # --- 🧠 復習クイズエリア ---
+    if st.session_state.quiz_data:
+        st.divider()
+        st.subheader("🧠 理解度チェッククイズ（全3問）")
+        st.write("講義内容のポイントを理解できているかテストしてみましょう！")
+
+        user_answers = {}
+        for idx, q in enumerate(st.session_state.quiz_data):
+            st.markdown(f"**問{idx+1}. {q['question']}**")
+            user_answers[idx] = st.radio(
+                f"問{idx+1}の選択肢",
+                q["options"],
+                key=f"quiz_opt_{idx}",
+                label_visibility="collapsed"
+            )
+
+        if st.button("📝 答え合わせをする"):
+            st.session_state.quiz_submitted = True
+
+        if st.session_state.quiz_submitted:
+            score = 0
+            st.markdown("---")
+            st.markdown("### 採点結果")
+            
+            for idx, q in enumerate(st.session_state.quiz_data):
+                selected = user_answers.get(idx)
+                correct = q["answer"]
+                
+                if selected == correct:
+                    score += 1
+                    st.success(f"✅ **問{idx+1}：正解！**（あなたの回答: {selected}）")
+                else:
+                    st.error(f"❌ **問{idx+1}：不正解**（あなたの回答: {selected} / 正解: {correct}）")
+                
+                st.info(f"💡 **解説**: {q['explanation']}")
+
+            st.metric(label="最終スコア", value=f"{score} / {len(st.session_state.quiz_data)} 問正解")
+
+    # --- 💬 追加質問チャットエリア ---
     st.divider()
     st.subheader("💬 講義内容についての追加質問")
-    st.write("要約や講義資料で分からない点、さらに詳しく知りたい用語などを質問してみましょう。")
+    st.write("要約やクイズでわからなかった部分をAIに質問してみましょう。")
 
-    # 過去のチャット履歴を表示
     for message in st.session_state.chat_history:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # 質問入力フォーム
-    if user_query := st.chat_input("例: 「専門用語の〇〇について、もっと噛み砕いて教えて！」"):
+    if user_query := st.chat_input("例: 「問1の解説にある〇〇という言葉をもっと詳しく教えて！」"):
         st.session_state.chat_history.append({"role": "user", "content": user_query})
         with st.chat_message("user"):
             st.markdown(user_query)
