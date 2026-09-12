@@ -99,7 +99,7 @@ if st.button("✨ 要約を生成する", type="primary"):
     if current_input is None:
         st.warning("要約するテキストを入力するか、ファイルをアップロードしてください。")
     else:
-        with st.spinner("Gemini APIが要約を生成中..."):
+        with st.spinner("要約を生成中..."):
             try:
                 summary_prompt = """
                 以下の講義資料（またはテキスト）を読み込み、学生の復習用に分かりやすく要約してください。
@@ -163,9 +163,9 @@ if st.session_state.summary:
             with st.spinner("復習クイズを作成中..."):
                 try:
                     quiz_prompt = """
-                    以下の講義資料をもとに、理解度をチェックするための3択クイズを3問作成してください。
+                    以下の講義資料をもとに、理解度をチェックするための基本的な3択クイズを3問作成してください。
                     必ず以下のJSON配列形式のみで出力してください（Markdownの囲みや余計な文章は一切不要です）。
-
+                
                     [
                       {
                         "question": "問題文1",
