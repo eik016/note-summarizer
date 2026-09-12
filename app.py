@@ -18,7 +18,7 @@ else:
     st.error("APIキーが設定されていません。.streamlit/secrets.toml を確認してください。")
     st.stop()
 
-model = genai.GenerativeModel("gemini-3.6-flash")
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 # --- セッション状態（記憶領域）の初期化 ---
 if "summary" not in st.session_state:
@@ -93,15 +93,14 @@ with tab2:
     if text_input.strip():
         current_input = text_input
 
-# 要約・クイズ実行ボタン
+# 要約実行ボタン
 st.divider()
-if st.button("✨ 要約とクイズを生成する", type="primary"):
+if st.button("✨ 要約を生成する", type="primary"):
     if current_input is None:
         st.warning("要約するテキストを入力するか、ファイルをアップロードしてください。")
     else:
-        with st.spinner("Gemini APIが要約と復習クイズを生成中..."):
+        with st.spinner("Gemini APIが要約を生成中..."):
             try:
-                # 1. 要約の生成
                 summary_prompt = """
                 以下の講義資料（またはテキスト）を読み込み、学生の復習用に分かりやすく要約してください。
 
@@ -116,29 +115,6 @@ if st.button("✨ 要約とクイズを生成する", type="primary"):
                 else:
                     summary_res = model.generate_content([summary_prompt, current_input])
 
-                # 2. クイズの自動生成 (JSON形式)
-                quiz_prompt = """
-                以下の講義資料をもとに、理解度をチェックするための3択クイズを3問作成してください。
-                必ず以下のJSON配列形式のみで出力してください（Markdownの囲みや余計な文章は一切不要です）。
-
-                [
-                  {
-                    "question": "問題文1",
-                    "options": ["選択肢A", "選択肢B", "選択肢C"],
-                    "answer": "正しい選択肢のテキスト（options内の文字列と完全一致）",
-                    "explanation": "解説文"
-                  }
-                ]
-                """
-                if isinstance(current_input, str):
-                    quiz_res = model.generate_content([quiz_prompt, current_input])
-                else:
-                    quiz_res = model.generate_content([quiz_prompt, current_input])
-
-                # JSONパース
-                cleaned_json = quiz_res.text.replace("```json", "").replace("```", "").strip()
-                parsed_quiz = json.loads(cleaned_json)
-
                 # 新しい処理結果を履歴へ保存
                 if st.session_state.summary:
                     st.session_state.saved_history.append({
@@ -146,11 +122,11 @@ if st.button("✨ 要約とクイズを生成する", type="primary"):
                         "chat": list(st.session_state.chat_history)
                     })
 
-                # ステート更新
+                # ステート更新（新しい要約を作成した時はクイズ領域を初期化）
                 st.session_state.summary = summary_res.text
-                st.session_state.quiz_data = parsed_quiz
-                st.session_state.quiz_submitted = False
                 st.session_state.input_content = current_input
+                st.session_state.quiz_data = None
+                st.session_state.quiz_submitted = False
                 st.session_state.chat_history = []
                 
                 st.rerun()
@@ -177,11 +153,41 @@ if st.session_state.summary:
     )
 
     # --- 🧠 復習クイズエリア ---
-    if st.session_state.quiz_data:
-        st.divider()
-        st.subheader("🧠 理解度チェッククイズ（全3問）")
-        st.write("講義内容のポイントを理解できているかテストしてみましょう！")
+    st.divider()
+    st.subheader("🧠 理解度チェッククイズ")
+    
+    # クイズがまだ作成されていない場合（ボタンを表示）
+    if st.session_state.quiz_data is None:
+        st.write("この講義内容から復習クイズを自動作成して解くことができます。")
+        if st.button("❓ 復習クイズに挑戦する（3問）"):
+            with st.spinner("復習クイズを作成中..."):
+                try:
+                    quiz_prompt = """
+                    以下の講義資料をもとに、理解度をチェックするための3択クイズを3問作成してください。
+                    必ず以下のJSON配列形式のみで出力してください（Markdownの囲みや余計な文章は一切不要です）。
 
+                    [
+                      {
+                        "question": "問題文1",
+                        "options": ["選択肢A", "選択肢B", "選択肢C"],
+                        "answer": "正しい選択肢のテキスト（options内の文字列と完全一致）",
+                        "explanation": "解説文"
+                      }
+                    ]
+                    """
+                    if isinstance(st.session_state.input_content, str):
+                        quiz_res = model.generate_content([quiz_prompt, st.session_state.input_content])
+                    else:
+                        quiz_res = model.generate_content([quiz_prompt, st.session_state.input_content])
+
+                    cleaned_json = quiz_res.text.replace("```json", "").replace("```", "").strip()
+                    st.session_state.quiz_data = json.loads(cleaned_json)
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"クイズの生成中にエラーが発生しました: {e}")
+
+    # クイズが作成されている場合（問題と選択肢を表示）
+    else:
         user_answers = {}
         for idx, q in enumerate(st.session_state.quiz_data):
             st.markdown(f"**問{idx+1}. {q['question']}**")
@@ -198,7 +204,7 @@ if st.session_state.summary:
         if st.session_state.quiz_submitted:
             score = 0
             st.markdown("---")
-            st.markdown("### 採点結果")
+            st.markdown("### 🏆 採点結果")
             
             for idx, q in enumerate(st.session_state.quiz_data):
                 selected = user_answers.get(idx)
