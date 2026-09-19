@@ -24,11 +24,11 @@
 
 ## 使用技術
 
-- Language: Python 3.12 
-- Framework: Streamlit
+- 使用言語: Python 3.12 
+- webフレームワーク: Streamlit
 - SDK: google-genai (Gemini API / gemini-3.6-flash)
-- Deployment: Streamlit Community Cloud
-- Version Control: Git / GitHub
+- データ処理: JSON(クイズ構造化出力用）,Pillow(画像）
+- バージョン管理・デプロイ: Git 、 GitHub、Streamlit Community Cloud
 
 ---
 
