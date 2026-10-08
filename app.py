@@ -36,7 +36,7 @@ if "quiz_submitted" not in st.session_state:
 
 # --- サイドバー：過去の履歴一覧 ---
 st.sidebar.title("📚 過去の要約・質問履歴")
-st.sidebar.write("作成した要約や質問の履歴がここに残ります。")
+st.sidebar.write("作成した要約や質問の履歴がここに残ります")
 
 if st.session_state.saved_history:
     for idx, item in enumerate(reversed(st.session_state.saved_history)):
@@ -49,11 +49,11 @@ if st.session_state.saved_history:
                     role_name = "👤 学生" if chat["role"] == "user" else "🤖 AI"
                     st.caption(f"{role_name}: {chat['content']}")
 else:
-    st.sidebar.info("まだ履歴はありません。")
+    st.sidebar.info("まだ履歴はありません")
 
 # --- メイン画面 ---
 st.title("📝 講義ノート要約＆復習クイズアプリ")
-st.write("講義資料（PDF / 画像 / テキスト）から自動要約を作成し、復習クイズやAIへの追加質問で理解度を深められます。")
+st.write("講義資料（PDF / 画像 / テキスト）から自動要約を作成し、復習クイズやAIへの追加質問で理解度を深められます")
 
 # 入力方法の選択（タブ切り替え）
 tab1, tab2 = st.tabs(["📁 ファイルアップロード", "✍️ テキスト直接入力"])
@@ -72,7 +72,7 @@ with tab1:
         
         if file_type == "text/plain":
             current_input = uploaded_file.read().decode("utf-8")
-            st.success("テキストファイルを読み込みました。")
+            st.success("テキストファイルを読み込みました")
             
         elif file_type in ["image/png", "image/jpeg"]:
             image = Image.open(uploaded_file)
@@ -85,7 +85,7 @@ with tab1:
                 "mime_type": "application/pdf",
                 "data": pdf_bytes
             }
-            st.success(f"PDFファイル「{uploaded_file.name}」を読み込みました。")
+            st.success(f"PDFファイル「{uploaded_file.name}」を読み込みました")
 
 # タブ2: テキスト直接入力
 with tab2:
@@ -97,12 +97,12 @@ with tab2:
 st.divider()
 if st.button("✨ 要約を生成する", type="primary"):
     if current_input is None:
-        st.warning("要約するテキストを入力するか、ファイルをアップロードしてください。")
+        st.warning("要約するテキストを入力するか、ファイルをアップロードしてください")
     else:
         with st.spinner("要約を生成中..."):
             try:
                 summary_prompt = """
-                以下の講義資料（またはテキスト）を読み込み、学生の復習用に分かりやすく要約してください。
+                以下の講義資料（またはテキスト）を読み込み、学生の復習用に分かりやすく要約してください
 
                 【出力フォーマット】
                 1. 📌 **講義の概要**（2〜3行で簡潔に）
@@ -158,7 +158,7 @@ if st.session_state.summary:
     
     # クイズがまだ作成されていない場合（ボタンを表示）
     if st.session_state.quiz_data is None:
-        st.write("この講義内容から復習クイズを自動作成して解くことができます。")
+        st.write("この講義内容から復習クイズを自動作成して解くことができます")
         if st.button("❓ 復習クイズに挑戦する（3問）"):
             with st.spinner("復習クイズを作成中..."):
                 try:
@@ -223,7 +223,7 @@ if st.session_state.summary:
     # --- 💬 追加質問チャットエリア ---
     st.divider()
     st.subheader("💬 講義内容についての追加質問")
-    st.write("要約やクイズでわからなかった部分をAIに質問してみましょう。")
+    st.write("要約やクイズでわからなかった部分をAIに質問してみましょう")
 
     for message in st.session_state.chat_history:
         with st.chat_message(message["role"]):
@@ -238,7 +238,7 @@ if st.session_state.summary:
             with st.spinner("講義資料を参照して回答を作成中..."):
                 try:
                     chat_prompt = f"""
-                    あなたは大学の丁寧なティーチングアシスタントです。
+                    あなたは丁寧なティーチングアシスタントです。
                     以下の「講義資料」と「要約結果」を参考に、学生からの質問に分かりやすく答えてください。
 
                     【要約結果】
