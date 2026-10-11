@@ -231,10 +231,10 @@ if st.session_state.summary:
 
     user_query = st.chat_input("例: 「問1の解説にある〇〇という言葉をもっと詳しく教えて！」")
 
-　　if user_query:
-   　　　 st.session_state.chat_history.append({"role": "user", "content": user_query})
-    　　　with st.chat_message("user"):
-        　　　st.markdown(user_query)
+if user_query:
+    st.session_state.chat_history.append({"role": "user", "content": user_query})
+    with st.chat_message("user"):
+        st.markdown(user_query)
 
         with st.chat_message("assistant"):
             with st.spinner("講義資料を参照して回答を作成中..."):
