@@ -232,7 +232,7 @@ if st.session_state.summary:
     if user_query := st.chat_input("..."):
         st.session_state.chat_history.append({"role": "user", "content": user_query})
         with st.chat_message("user"):
-        st.markdown(user_query)
+         st.markdown(user_query)
         with st.chat_message("assistant"):
             with st.spinner("講義資料を参照して回答を作成中..."):
                 try:
